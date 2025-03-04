@@ -2,7 +2,6 @@ import { Router } from "express";
 import { signInMiddleware } from "../middlewares/signInMiddlware";
 const { RoomSchema } = require("@repo/common/types");
 const client = require("@repo/db/client");
-
 export const RoomRoutes: Router = Router();
 
 RoomRoutes.get(
@@ -16,16 +15,18 @@ RoomRoutes.get(
       // const chats = await client.chat.find({ where: { roomId } });
       const chats = await client.chat.findMany({
         where: { roomId: parseInt(roomId) },
+        orderBy: { createdAt: "desc" },
+        take: 50,
       });
 
       console.log(chats);
+      res.json({ message: "got all chats", chats });
     } catch (error) {
       console.error("Error fetching room:", error);
       res.status(500).json({ message: "Error fetching room chats" });
     }
   }
 );
-
 RoomRoutes.post(
   "/create-room",
   signInMiddleware,
@@ -49,3 +50,23 @@ RoomRoutes.post(
     res.json({ message: "Creating room" });
   }
 );
+
+RoomRoutes.get("/:slug", async (req, res) => {
+  const slug = req.params.slug;
+  console.log(slug);
+
+  await client.room
+    .findUnique({
+      where: { Slug: slug },
+    })
+    .then((room: any) => {
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+      res.json({ message: "Room found", room });
+    })
+    .catch((error: any) => {
+      console.error("Error fetching room:", error);
+      res.status(500).json({ message: "Error fetching room" });
+    });
+});
