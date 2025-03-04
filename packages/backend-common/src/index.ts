@@ -1,1 +1,5 @@
-export const JWT_SECRET = process.env.JWT_SECRET || "aaryan";
+const JWT_SECRET = "aaryan";
+
+module.exports = {
+  JWT_SECRET,
+};

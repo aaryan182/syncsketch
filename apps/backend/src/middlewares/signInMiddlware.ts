@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "@repo/backend-common/config";
+const { JWT_SECRET } = require("@repo/backend-common/config");
 
 export function signInMiddleware(
   req: Request,
@@ -11,13 +11,13 @@ export function signInMiddleware(
 
   if (!token) {
     res.status(401).json({ message: "Token not provided" });
-    return; 
+    return;
   }
 
   try {
     const decodedToken = jwt.verify(token, JWT_SECRET) as { userId: string };
     req.userId = decodedToken.userId; // Extend `Request` to include `userId`
-    next(); 
+    next();
   } catch (error) {
     res.status(403).json({ message: "Invalid token" });
   }

@@ -1,10 +1,9 @@
 import express, { Router } from "express";
-import { JWT_SECRET } from "@repo/backend-common/config";
-import { CreateUserSchema } from "@repo/common/types";
+import jwt from "jsonwebtoken";
+const { JWT_SECRET } = require("@repo/backend-common/config");
+const { CreateUserSchema } = require("@repo/common/types");
 
 const client = require("@repo/db/client");
-
-import jwt from "jsonwebtoken";
 
 const userRoutes: Router = Router();
 
@@ -26,8 +25,16 @@ userRoutes.post("/signUp", async (req: any, res: any) => {
         password,
       },
     });
-    console.log(user);
-  } catch (error) {}
+    console.log("User created successfully:", user);
+    res.json({ message: "signed up successfully", userId: user.id });
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+    if (error.code === "P2002") {
+      res.status(400).json({ message: "Email already exists" });
+    } else {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
   // db call
   res.json({ message: "signed up successfully", userId: 1 });
 });
